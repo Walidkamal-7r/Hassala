@@ -5,6 +5,29 @@ void main() {
   runApp(const MotivationApp());
 }
 
+// خلفية التطبيق بتدرج لوني (Gradient) بين اللونين المطلوبين
+const LinearGradient kAppGradient = LinearGradient(
+  colors: [Color(0xFF1D4350), Color(0xFFA43931)],
+  begin: Alignment.topLeft,
+  end: Alignment.bottomRight,
+);
+
+class GradientScaffold extends StatelessWidget {
+  final Widget child;
+  const GradientScaffold({super.key, required this.child});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: Colors.transparent,
+      body: Container(
+        decoration: const BoxDecoration(gradient: kAppGradient),
+        child: child,
+      ),
+    );
+  }
+}
+
 // ---------------------------------------------------------------------------
 // كل النصوص العربية هنا متكتوبة بصيغة \u{...} عمدًا (يونيكود إسكيب)
 // عشان تفضل شغالة صح مهما كان الترميز بتاع أي محرر بتلزقها فيه.
@@ -39,6 +62,9 @@ class AR {
   static const loadingText = '\u{644}\u{62d}\u{638}\u{629} \u{628}\u{633}...';
 }
 
+const String kAppName = 'Hassala';
+const String kAppAuthor = 'By Walid kamal';
+
 // ---------------------------------------------------------------------------
 // مفاتيح التخزين الدائم (SharedPreferences) - بيفضل محفوظ حتى لو قفلت التطبيق
 // ---------------------------------------------------------------------------
@@ -58,7 +84,7 @@ class MotivationApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      title: 'Motivation Board',
+      title: kAppName,
       theme: ThemeData(
         scaffoldBackgroundColor: const Color(0xFF1C1A18),
         colorScheme: ColorScheme.fromSeed(
@@ -68,64 +94,74 @@ class MotivationApp extends StatelessWidget {
       ),
       home: const Directionality(
         textDirection: TextDirection.rtl,
-        child: AppRoot(),
+        child: SplashScreen(),
       ),
     );
   }
 }
 
 // ---------------------------------------------------------------------------
-// نقطة الدخول: بتقرر تفتح شاشة الإعداد ولا شاشة اللوحة على طول
-// حسب لو فيه اسم وسبب محفوظين قبل كده
+// شاشة البداية (Splash) - بتظهر اسم التطبيق شوية وبتحمّل بيانات المستخدم
+// وبعدين تقرر تفتح شاشة الإعداد ولا شاشة اللوحة على طول
 // ---------------------------------------------------------------------------
-class AppRoot extends StatefulWidget {
-  const AppRoot({super.key});
+class SplashScreen extends StatefulWidget {
+  const SplashScreen({super.key});
 
   @override
-  State<AppRoot> createState() => _AppRootState();
+  State<SplashScreen> createState() => _SplashScreenState();
 }
 
-class _AppRootState extends State<AppRoot> {
-  bool _loading = true;
-  String? _name;
-  String? _reason;
-
+class _SplashScreenState extends State<SplashScreen> {
   @override
   void initState() {
     super.initState();
-    _loadSavedProfile();
+    _init();
   }
 
-  Future<void> _loadSavedProfile() async {
-    final prefs = await SharedPreferences.getInstance();
-    setState(() {
-      _name = prefs.getString(StoreKeys.name);
-      _reason = prefs.getString(StoreKeys.reason);
-      _loading = false;
-    });
+  Future<void> _init() async {
+    final results = await Future.wait([
+      SharedPreferences.getInstance(),
+      Future.delayed(const Duration(seconds: 2)),
+    ]);
+    final prefs = results[0] as SharedPreferences;
+    final name = prefs.getString(StoreKeys.name);
+    final reason = prefs.getString(StoreKeys.reason);
+    final hasProfile =
+        name != null && name.trim().isNotEmpty && reason != null && reason.trim().isNotEmpty;
+
+    if (!mounted) return;
+    Navigator.of(context).pushReplacement(
+      MaterialPageRoute(
+        builder: (_) => hasProfile ? BoardScreen(name: name!, reason: reason!) : const SetupScreen(),
+      ),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
-    if (_loading) {
-      return const Scaffold(
-        body: Center(
-          child: Text(
-            AR.loadingText,
-            style: TextStyle(color: Colors.white54, fontSize: 16),
-          ),
+    return GradientScaffold(
+      child: Center(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Text(
+              kAppName,
+              style: TextStyle(
+                color: Color(0xFFE8C99B),
+                fontSize: 42,
+                fontWeight: FontWeight.bold,
+                letterSpacing: 1,
+              ),
+            ),
+            const SizedBox(height: 10),
+            const Text(
+              kAppAuthor,
+              style: TextStyle(color: Colors.white54, fontSize: 15),
+            ),
+          ],
         ),
-      );
-    }
-
-    final hasProfile =
-        _name != null && _name!.trim().isNotEmpty && _reason != null && _reason!.trim().isNotEmpty;
-
-    if (!hasProfile) {
-      return const SetupScreen();
-    }
-
-    return BoardScreen(name: _name!, reason: _reason!);
+      ),
+    );
   }
 }
 
@@ -198,8 +234,8 @@ class _SetupScreenState extends State<SetupScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: SafeArea(
+    return GradientScaffold(
+      child: SafeArea(
         child: Padding(
           padding: const EdgeInsets.all(24),
           child: Column(
@@ -439,8 +475,8 @@ class _BoardScreenState extends State<BoardScreen> {
   @override
   Widget build(BuildContext context) {
     if (!_ready) {
-      return const Scaffold(
-        body: Center(
+      return const GradientScaffold(
+        child: Center(
           child: Text(
             AR.loadingText,
             style: TextStyle(color: Colors.white54, fontSize: 16),
@@ -452,8 +488,8 @@ class _BoardScreenState extends State<BoardScreen> {
     final untilReveal = kRevealEvery - (_tapCount % kRevealEvery);
     final showCounterHint = untilReveal == kRevealEvery ? 0 : untilReveal;
 
-    return Scaffold(
-      body: SafeArea(
+    return GradientScaffold(
+      child: SafeArea(
         child: Padding(
           padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
           child: Container(
