@@ -5,7 +5,6 @@ void main() {
   runApp(const MotivationApp());
 }
 
-// خلفية التطبيق بتدرج لوني (Gradient) بين اللونين المطلوبين
 const LinearGradient kAppGradient = LinearGradient(
   colors: [Color(0xFF1D4350), Color(0xFFA43931)],
   begin: Alignment.topLeft,
@@ -28,10 +27,6 @@ class GradientScaffold extends StatelessWidget {
   }
 }
 
-// ---------------------------------------------------------------------------
-// كل النصوص العربية هنا متكتوبة بصيغة \u{...} عمدًا (يونيكود إسكيب)
-// عشان تفضل شغالة صح مهما كان الترميز بتاع أي محرر بتلزقها فيه.
-// ---------------------------------------------------------------------------
 class AR {
   static const setupTitle = '\u{642}\u{628}\u{644} \u{645}\u{627} \u{646}\u{628}\u{62f}\u{623} \u{1f44b}';
   static const nameHint = '\u{627}\u{643}\u{62a}\u{628} \u{627}\u{633}\u{645}\u{643}';
@@ -65,9 +60,6 @@ class AR {
 const String kAppName = 'Hassala';
 const String kAppAuthor = 'By Walid kamal';
 
-// ---------------------------------------------------------------------------
-// مفاتيح التخزين الدائم (SharedPreferences) - بيفضل محفوظ حتى لو قفلت التطبيق
-// ---------------------------------------------------------------------------
 class StoreKeys {
   static const name = 'user_name';
   static const reason = 'saving_reason';
@@ -100,10 +92,7 @@ class MotivationApp extends StatelessWidget {
   }
 }
 
-// ---------------------------------------------------------------------------
-// شاشة البداية (Splash) - بتظهر اسم التطبيق شوية وبتحمّل بيانات المستخدم
-// وبعدين تقرر تفتح شاشة الإعداد ولا شاشة اللوحة على طول
-// ---------------------------------------------------------------------------
+
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
 
@@ -165,9 +154,7 @@ class _SplashScreenState extends State<SplashScreen> {
   }
 }
 
-// ---------------------------------------------------------------------------
-// شاشة إدخال الاسم وسبب التحويش - بتظهر مرة واحدة بس أول ما تفتح التطبيق
-// ---------------------------------------------------------------------------
+
 class SetupScreen extends StatefulWidget {
   const SetupScreen({super.key});
 
@@ -298,9 +285,6 @@ class _SetupScreenState extends State<SetupScreen> {
   }
 }
 
-// ---------------------------------------------------------------------------
-// أرقام اللوحة (نفس توزيع الصورة الأصلية - المجموع الكلي = 5000)
-// ---------------------------------------------------------------------------
 const List<int> kBoardNumbers = [
   5, 20, 10, 20, 5, 5, 200, 5, 10, 20,
   10, 5, 10, 20, 10, 50, 50, 200, 5, 5,
@@ -318,11 +302,8 @@ const List<int> kBoardNumbers = [
 ];
 
 const int kColumns = 10;
-const int kRevealEvery = 7; // كل ٧ شطبات يتكشف المجموع
+const int kRevealEvery = 7; 
 
-// ---------------------------------------------------------------------------
-// شاشة اللوحة نفسها - بتحمّل وتحفظ حالتها بالكامل في التخزين الدائم
-// ---------------------------------------------------------------------------
 class BoardScreen extends StatefulWidget {
   final String name;
   final String reason;
@@ -373,8 +354,7 @@ class _BoardScreenState extends State<BoardScreen> {
   }
 
   void _onTapNumber(int index) {
-    if (_crossed[index]) return; // كل رقم يتشطب مرة واحدة بس
-
+    if (_crossed[index]) return;
     setState(() {
       _crossed[index] = true;
       _crossedSum += kBoardNumbers[index];
