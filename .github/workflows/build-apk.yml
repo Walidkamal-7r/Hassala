@@ -17,11 +17,17 @@ jobs:
         with:
           channel: stable
 
-      - name: Scaffold Flutter project (adds android/ios/pubspec if missing)
-        run: flutter create --project-name motivation_board .
+      - name: Scaffold Flutter project (adds android/ios if missing, keeps existing pubspec.yaml)
+        run: flutter create .
+
+      - name: Set app display name to Hassala
+        run: sed -i 's/android:label="[^"]*"/android:label="Hassala"/' android/app/src/main/AndroidManifest.xml
 
       - name: Get dependencies
         run: flutter pub get
+
+      - name: Generate app icons (dollar sign)
+        run: flutter pub run flutter_launcher_icons:main
 
       - name: Build release APK
         run: flutter build apk --release
